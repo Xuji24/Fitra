@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import { FooterLogo } from "@/components/logo";
 
 const Footer = () => {
   const quickLinks = [
@@ -97,15 +97,7 @@ const Footer = () => {
           {/* Logo and Description Section - Left Side */}
           <div className="col-span-1 p-0">
             <div className="mb-4">
-              <a href="#" className="inline-block">
-                <Image
-                  src="/be-fit-era-logo.png"
-                  alt="Be Fit ERA Logo"
-                  width={200}
-                  height={200}
-                  className="w-40 h-auto object-contain"
-                />
-              </a>
+              <FooterLogo />
             </div>
             <div className="max-w-md">
               <p className="text-white text-sm leading-relaxed mb-6">

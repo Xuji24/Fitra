@@ -1,22 +1,21 @@
 "use client";
-import Image from "next/image";
-import { Button } from "@/components/shadcn/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
-
+import Logo from "@/components/logo";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Placeholder for auth state
+  useEffect(() => {
+    function checkAuth() {
+      setIsLoggedIn(true);
+    }
+    checkAuth();
 
+  },[])
   return (
     <nav className="w-full bg-[#F4F3F6] px-4 sm:px-6 lg:p-8 py-3 sm:py-4 flex items-center justify-between lg:justify-start gap-4 lg:gap-10 relative">
       <div className="w-40 sm:w-24 lg:w-52 lg:ml-10 shrink-0 absolute left-4 lg:left-0">
-        <Image
-          src="/dark-logo-bfe.png"
-          alt="Be Fit ERA Logo"
-          width={150}
-          height={150}
-          className="w-full h-auto object-contain"
-        />
+        <Logo />
       </div>
 
       {/* Desktop Navigation */}
@@ -53,9 +52,9 @@ export default function Navbar() {
         </a>
         {/* Desktop Sign In Button */}
         <div className="hidden lg:block shrink-0">
-            <Button className="font-raleway font-bold text-sm sm:text-base bg-[#F4F3F6] border drop-shadow-[0_3px_4px_#193C43] text-[#193C43] hover:bg-[#e7e6e9] transition-colors px-6 sm:px-8 py-2 sm:py-3 rounded-full cursor-pointer">
+            <a href="/login" className="font-raleway font-bold text-sm sm:text-base bg-[#F4F3F6] border drop-shadow-[0_3px_4px_#193C43] text-[#193C43] hover:bg-[#e7e6e9] transition-colors px-6 sm:px-8 py-2 sm:py-3 rounded-full cursor-pointer">
             Sign In
-            </Button>
+            </a>
         </div>
       </div>
 
@@ -92,7 +91,7 @@ export default function Navbar() {
             href="#"
             className="font-raleway font-bold text-sm text-white hover:text-[#33CCB3] transition-colors py-2"
           >
-            FAQs
+            Leaderboard
           </a>
           <a
             href="#"
@@ -100,12 +99,21 @@ export default function Navbar() {
           >
             Contact
           </a>
-          <a
-            href="#"
-            className="font-raleway font-bold text-sm text-white hover:text-[#33CCB3] transition-colors py-2 border-t border-[#33CCB3]/20 pt-3"
-          >
-            Sign In
-          </a>
+          {isLoggedIn ? (
+            <a
+              href="/profile"
+              className="font-raleway font-bold text-sm text-white hover:text-[#33CCB3] transition-colors py-2"
+            >
+              Profile
+            </a>
+          ) : (
+            <a
+              href="/login"
+              className="font-raleway font-bold text-sm text-white hover:text-[#33CCB3] transition-colors py-2"
+            >
+              Sign In
+            </a>
+          )}
         </div>
       )}
     </nav>
