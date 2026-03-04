@@ -51,10 +51,10 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #F4F3F6;
-  --foreground: #193C43;
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --background: #FAFAF8;
+  --foreground: #1A1A1A;
+  --card: #ffffff;
+  --card-foreground: #1A1A1A;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
@@ -85,10 +85,10 @@
 }
 
 .dark {
-  --background: #193C43;
-  --foreground: #F4F3F6;
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
+  --background: #121212;
+  --foreground: #F0F0F0;
+  --card: #1C1C1E;
+  --card-foreground: #F0F0F0;
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
@@ -186,6 +186,21 @@
 
 .animate-slide-up {
   animation: slide-up 0.5s ease-out both;
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out both;
 }
 
 .animation-delay-100 {

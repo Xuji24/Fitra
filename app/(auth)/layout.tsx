@@ -6,6 +6,7 @@ import {
   Merriweather_Sans,
 } from "next/font/google";
 import "../globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,8 +31,8 @@ const merriweatherSans = Merriweather_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Login | Be Fit ERA",
-  description: "Login to your Be Fit ERA account.",
+  title: "Auth | Be Fit ERA",
+  description: "Sign in to your Be Fit ERA account.",
 };
 
 export default function AuthLayout({
@@ -45,7 +46,14 @@ export default function AuthLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} ${raleway.variable} ${merriweatherSans.variable} antialiased h-screen overflow-hidden`}
       >
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,0 +1,118 @@
+import { RaceEvent } from "@/utils/types/race-types";
+
+export const racesData: RaceEvent[] = [
+  {
+    id: "1",
+    title: "Manila Sunrise Marathon 2026",
+    organizer: "RunPH Events",
+    date: "March 15, 2026",
+    time: "5:00 AM",
+    location: "Manila, Philippines",
+    category: "Marathon",
+    description:
+      "Experience the beauty of Manila at sunrise as you run through historical landmarks and scenic routes.",
+    fullDescription:
+      "The Manila Sunrise Marathon 2026 takes runners on an unforgettable journey through the heart of Manila. Starting at Rizal Park, the route passes through Intramuros, the Manila Baywalk, and other iconic landmarks. Whether you're a seasoned marathoner or challenging yourself for the first time, this event promises a world-class experience with full hydration stations, medical support, chip timing, and a stunning finisher's medal. Post-race celebrations include live music, food stalls, and an awards ceremony.",
+    image: "/Running.jpg",
+    organizerLogo: "/fitra-logo.png",
+    participants: 1200,
+    maxParticipants: 2000,
+    registrationOpen: true,
+    registrationDeadline: "March 10, 2026",
+  },
+  {
+    id: "2",
+    title: "Cebu Island 10K Challenge",
+    organizer: "Island Runners PH",
+    date: "March 22, 2026",
+    time: "6:00 AM",
+    location: "Cebu City, Philippines",
+    category: "10K",
+    description:
+      "A scenic 10K run through Cebu's most beautiful coastal roads and urban trails.",
+    fullDescription:
+      "The Cebu Island 10K Challenge is designed for runners who love coastal scenery and vibrant city culture. Starting from the Cebu IT Park, the course winds through Lahug, passes the Temple of Leah viewpoint area, and finishes at the Cebu Business Park. Expect a fast, flat course ideal for personal bests. All finishers receive a premium tech shirt, finisher's medal, and loot bag. Top 3 in each age group receive special prizes.",
+    image: "/Running.jpg",
+    organizerLogo: "/fitra-logo.png",
+    participants: 450,
+    maxParticipants: 500,
+    registrationOpen: true,
+    registrationDeadline: "March 18, 2026",
+  },
+  {
+    id: "3",
+    title: "BGC Night Run 5K",
+    organizer: "Metro Run Club",
+    date: "April 5, 2026",
+    time: "7:00 PM",
+    location: "Taguig, Philippines",
+    category: "5K",
+    description:
+      "A fun nighttime 5K run through the vibrant streets of Bonifacio Global City.",
+    fullDescription:
+      "BGC Night Run 5K is a fun, community-driven event perfect for beginners and casual runners. The route loops through the well-lit streets of BGC, passing High Street, Terra 28th, and Mind Museum. The event features glow sticks, LED armbands, and a post-run party with DJs and food trucks. Families and groups are welcome! Every finisher gets a glow-in-the-dark medal and event shirt.",
+    image: "/Running.jpg",
+    organizerLogo: "/fitra-logo.png",
+    participants: 300,
+    maxParticipants: 800,
+    registrationOpen: true,
+    registrationDeadline: "April 1, 2026",
+  },
+  {
+    id: "4",
+    title: "Baguio Half Marathon",
+    organizer: "Highland Runners",
+    date: "April 12, 2026",
+    time: "4:30 AM",
+    location: "Baguio City, Philippines",
+    category: "Half Marathon",
+    description:
+      "Challenge yourself on the cool mountain trails of Baguio City in this half marathon.",
+    fullDescription:
+      "The Baguio Half Marathon is one of the most challenging yet rewarding races in the Philippines. Running at an elevation of 1,500 meters, participants experience cooler temperatures and pine-fresh air. The route passes through Camp John Hay, Burnham Park, and the scenic Kennon Road overlook. This is a true test of endurance with rolling hills and breathtaking views. Aid stations every 3km, full medical team, and chip timing included.",
+    image: "/Running.jpg",
+    organizerLogo: "/fitra-logo.png",
+    participants: 600,
+    maxParticipants: 600,
+    registrationOpen: false,
+    registrationDeadline: "April 5, 2026",
+  },
+  {
+    id: "5",
+    title: "Davao Durian Dash 5K",
+    organizer: "Mindanao Runners",
+    date: "April 20, 2026",
+    time: "5:30 AM",
+    location: "Davao City, Philippines",
+    category: "5K",
+    description:
+      "A fun and fruity 5K run celebrating Davao's famous durian festival season.",
+    fullDescription:
+      "The Davao Durian Dash 5K is a unique themed run that celebrates Davao's iconic fruit. Runners pass through People's Park, Jack's Ridge, and the Durian Dome. The route is flat and beginner-friendly with durian-themed aid stations offering durian candies and shakes. Every finisher receives a quirky durian-shaped medal, event shirt, and a box of fresh durians. Fun run categories for kids and families available.",
+    image: "/Running.jpg",
+    organizerLogo: "/fitra-logo.png",
+    participants: 180,
+    maxParticipants: 400,
+    registrationOpen: true,
+    registrationDeadline: "April 15, 2026",
+  },
+  {
+    id: "6",
+    title: "Subic Bay 10K Classic",
+    organizer: "Freeport Runners Assoc.",
+    date: "May 3, 2026",
+    time: "5:00 AM",
+    location: "Subic Bay, Philippines",
+    category: "10K",
+    description:
+      "Run through the lush greenery and scenic bay views of the Subic Bay Freeport Zone.",
+    fullDescription:
+      "The Subic Bay 10K Classic offers one of the most scenic race routes in the Philippines. Starting at the Subic Bay Convention Center, runners pass through the jungle-lined roads, the historic Naval Magazine area, and finish with a stunning bayfront stretch. The clean air, flat terrain, and well-organized event make this a favorite among 10K enthusiasts. Includes chip timing, finisher's medal, race kit, and post-race brunch.",
+    image: "/Running.jpg",
+    organizerLogo: "/fitra-logo.png",
+    participants: 320,
+    maxParticipants: 700,
+    registrationOpen: true,
+    registrationDeadline: "April 28, 2026",
+  },
+];

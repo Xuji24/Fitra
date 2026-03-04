@@ -7,6 +7,8 @@ import {
 } from "next/font/google";
 import "../globals.css";
 import Footer from "@/components/seraui/footer";
+import { ThemeProvider } from "@/components/theme-provider";
+import ScrollToTop from "@/components/scroll-to-top";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -30,7 +32,7 @@ const merriweatherSans = Merriweather_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "be-fit-era",
+  title: "Fitra",
   description:
     "An event running app for runners to organize/join events and track their running progress.",
 };
@@ -46,8 +48,16 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} ${raleway.variable} ${merriweatherSans.variable} antialiased`}
       >
-        {children}
-        <Footer />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Footer />
+          <ScrollToTop />
+        </ThemeProvider>
       </body>
     </html>
   );
