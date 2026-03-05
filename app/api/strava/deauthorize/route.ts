@@ -128,10 +128,6 @@ export async function POST(request: NextRequest) {
       .delete()
       .eq("user_id", userId);
 
-    console.log(
-      `Strava deauthorization processed for athlete ${stravaAthleteId}, user ${userId}`
-    );
-
     return NextResponse.json({ status: "deauthorized" });
   } catch (err) {
     console.error("Strava deauthorize webhook error:", err);

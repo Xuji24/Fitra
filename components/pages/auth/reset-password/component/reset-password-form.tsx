@@ -2,11 +2,29 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/shadcn/button";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { resetPassword } from "@/app/(auth)/actions";
+import { validatePasswordStrength } from "@/lib/validators";
+
+const resetErrors: Record<string, string> = {
+  "New password should be different from the old password.":
+    "Please choose a different password.",
+  "Auth session missing!": "Your session has expired. Please try again.",
+  "Must be at least 8 characters": "Password must be at least 8 characters.",
+  "Must include an uppercase letter": "Password must include an uppercase letter.",
+  "Must include a lowercase letter": "Password must include a lowercase letter.",
+  "Must include a number": "Password must include a number.",
+  "Must include a symbol": "Password must include a symbol.",
+};
+
+function getError(error: string): string {
+  if (error.startsWith("Too many attempts")) return error;
+  return resetErrors[error] ?? "Something went wrong. Please try again.";
+}
 import LoginInput from "@/components/pages/auth/login/component/login-input";
+import PasswordStrengthIndicator from "@/components/password-strength-indicator";
 
 interface FormErrors {
   newPassword?: string;
@@ -14,14 +32,12 @@ interface FormErrors {
 }
 
 function validatePassword(password: string): string | undefined {
-  if (!password.trim()) return "Password is required";
-  if (password.length < 8) return "Password must be at least 8 characters";
-  return undefined;
+  return validatePasswordStrength(password);
 }
 
 function validateConfirmPassword(
   password: string,
-  confirmPassword: string
+  confirmPassword: string,
 ): string | undefined {
   if (!confirmPassword.trim()) return "Please confirm your password";
   if (password !== confirmPassword) return "Passwords do not match";
@@ -33,9 +49,7 @@ export default function ResetPasswordForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   const handleNewPasswordChange = (value: string) => {
     setNewPassword(value);
@@ -67,7 +81,7 @@ export default function ResetPasswordForm() {
     const newPasswordError = validatePassword(newPassword);
     const confirmPasswordError = validateConfirmPassword(
       newPassword,
-      confirmPassword
+      confirmPassword,
     );
 
     setErrors({
@@ -83,22 +97,13 @@ export default function ResetPasswordForm() {
 
       const result = await resetPassword(formData);
       if (!result.success && result.error) {
-        setAuthError(result.error);
-      } else if (result.redirectTo) {
-        router.push(result.redirectTo);
+        toast.error(getError(result.error));
       }
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full">
-      {/* Auth Error */}
-      {authError && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 animate-slide-up">
-          <p className="text-sm text-red-500 font-merriweather-sans">{authError}</p>
-        </div>
-      )}
-
       {/* New Password Input */}
       <div className="animate-slide-up animation-delay-100">
         <LoginInput
@@ -122,6 +127,7 @@ export default function ResetPasswordForm() {
           error={errors.confirmPassword}
         />
       </div>
+      <PasswordStrengthIndicator password={newPassword} />
 
       {/* Submit Button */}
       <div className="animate-slide-up animation-delay-300">
@@ -130,7 +136,11 @@ export default function ResetPasswordForm() {
           disabled={isPending}
           className="w-full py-5 rounded-xl bg-[#FF5733] text-white font-raleway font-bold text-base hover:bg-[#E84E2E] hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Change Password"}
+          {isPending ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            "Change Password"
+          )}
         </Button>
       </div>
 

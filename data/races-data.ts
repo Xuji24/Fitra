@@ -19,6 +19,21 @@ export const racesData: RaceEvent[] = [
     maxParticipants: 2000,
     registrationOpen: true,
     registrationDeadline: "March 10, 2026",
+    rewards: {
+      medal: {
+        name: "Sunrise Finisher's Medal",
+        description: "Gold-plated medal featuring the Manila skyline at dawn with an engraved distance marker.",
+      },
+      eCertificate: {
+        title: "Official Finisher's E-Certificate",
+        description: "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
+      },
+      prizes: [
+        "Premium tech shirt for all finishers",
+        "Top 3 per age group: Trophy + cash prize",
+        "Best costume award: ₱5,000 gift certificate",
+      ],
+    },
   },
   {
     id: "2",
@@ -38,6 +53,21 @@ export const racesData: RaceEvent[] = [
     maxParticipants: 500,
     registrationOpen: true,
     registrationDeadline: "March 18, 2026",
+    rewards: {
+      medal: {
+        name: "Island Runner Medal",
+        description: "Coastal-themed finisher's medal with a wave design and 10K distance engraving.",
+      },
+      eCertificate: {
+        title: "Official Finisher's E-Certificate",
+        description: "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
+      },
+      prizes: [
+        "Premium tech shirt for all finishers",
+        "Finisher's loot bag with sponsor products",
+        "Top 3 per age group: Special prizes",
+      ],
+    },
   },
   {
     id: "3",
@@ -57,6 +87,21 @@ export const racesData: RaceEvent[] = [
     maxParticipants: 800,
     registrationOpen: true,
     registrationDeadline: "April 1, 2026",
+    rewards: {
+      medal: {
+        name: "Glow Runner Medal",
+        description: "Glow-in-the-dark finisher's medal shaped like a lightning bolt.",
+      },
+      eCertificate: {
+        title: "Official Finisher's E-Certificate",
+        description: "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
+      },
+      prizes: [
+        "Glow-in-the-dark event shirt",
+        "LED armband for every participant",
+        "Best glow outfit: ₱3,000 gift certificate",
+      ],
+    },
   },
   {
     id: "4",
@@ -76,6 +121,21 @@ export const racesData: RaceEvent[] = [
     maxParticipants: 600,
     registrationOpen: false,
     registrationDeadline: "April 5, 2026",
+    rewards: {
+      medal: {
+        name: "Highland Conqueror Medal",
+        description: "Heavy brass medal with mountain ridge engraving and 21K distance marker.",
+      },
+      eCertificate: {
+        title: "Official Finisher's E-Certificate",
+        description: "Digital certificate with your name, finishing time, elevation profile, and official race results.",
+      },
+      prizes: [
+        "Premium performance shirt",
+        "Top 3 overall: Trophy + ₱10,000 cash prize",
+        "Top 3 per age group: Medals + gift packs",
+      ],
+    },
   },
   {
     id: "5",
@@ -95,6 +155,21 @@ export const racesData: RaceEvent[] = [
     maxParticipants: 400,
     registrationOpen: true,
     registrationDeadline: "April 15, 2026",
+    rewards: {
+      medal: {
+        name: "Durian Dash Medal",
+        description: "Quirky durian-shaped finisher's medal — a collector's item for fun runners.",
+      },
+      eCertificate: {
+        title: "Official Finisher's E-Certificate",
+        description: "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
+      },
+      prizes: [
+        "Event shirt for all finishers",
+        "Box of fresh Davao durians",
+        "Best durian costume: ₱2,000 gift certificate",
+      ],
+    },
   },
   {
     id: "6",
@@ -114,5 +189,20 @@ export const racesData: RaceEvent[] = [
     maxParticipants: 700,
     registrationOpen: true,
     registrationDeadline: "April 28, 2026",
+    rewards: {
+      medal: {
+        name: "Bay Classic Medal",
+        description: "Scenic bay-themed finisher's medal with a tropical design and 10K distance marker.",
+      },
+      eCertificate: {
+        title: "Official Finisher's E-Certificate",
+        description: "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
+      },
+      prizes: [
+        "Race kit with tech shirt and visor",
+        "Post-race brunch for all participants",
+        "Top 3 per age group: Trophies + sponsor gifts",
+      ],
+    },
   },
 ];

@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { RaceEvent } from "@/utils/types/race-types";
 import { CalendarDays, MapPin, Users, Clock } from "lucide-react";
 
 interface RaceCardProps {
   race: RaceEvent;
-  onViewDetails: (race: RaceEvent) => void;
 }
 
 function getDeadlineStatus(deadline: string): {
@@ -27,14 +27,14 @@ function getDeadlineStatus(deadline: string): {
   return { label: "Open", color: "bg-orange-400" };
 }
 
-export default function RaceCard({ race, onViewDetails }: RaceCardProps) {
+export default function RaceCard({ race }: RaceCardProps) {
   const status = getDeadlineStatus(race.registrationDeadline);
   const spotsLeft = race.maxParticipants - race.participants;
   const isFull = spotsLeft <= 0;
 
   return (
-    <div
-      onClick={() => onViewDetails(race)}
+    <Link
+      href={`/race/${race.id}`}
       className="flex flex-col sm:flex-row bg-white dark:bg-[#1C1C1E] rounded-xl shadow-sm border border-gray-100 dark:border-white/8 overflow-hidden hover:shadow-md hover:shadow-[#FF5733]/5 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
     >
       {/* Image */}
@@ -94,6 +94,6 @@ export default function RaceCard({ race, onViewDetails }: RaceCardProps) {
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

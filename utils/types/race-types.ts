@@ -1,3 +1,15 @@
+export interface RaceReward {
+  medal: {
+    name: string;
+    description: string;
+  };
+  eCertificate: {
+    title: string;
+    description: string;
+  };
+  prizes?: string[];
+}
+
 export interface RaceEvent {
   id: string;
   title: string;
@@ -14,6 +26,7 @@ export interface RaceEvent {
   maxParticipants: number;
   registrationOpen: boolean;
   registrationDeadline: string;
+  rewards: RaceReward;
 }
 
 export type RaceCategory = "All" | "5K" | "10K" | "Half Marathon" | "Marathon";

@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/shadcn/button";
 import { Send } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { submitContactForm } from "@/app/(main)/actions";
 
-interface FormData {
+interface ContactFormData {
   name: string;
   email: string;
   subject: string;
@@ -12,34 +15,40 @@ interface FormData {
 }
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: "",
     email: "",
     subject: "",
     message: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.append("name", formData.name);
+      fd.append("email", formData.email);
+      fd.append("subject", formData.subject);
+      fd.append("message", formData.message);
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({ name: "", email: "", subject: "", message: "" });
-
-    // Reset success message after 5 seconds
-    setTimeout(() => setIsSubmitted(false), 5000);
+      const result = await submitContactForm(fd);
+      if (!result.success && result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Message sent! We'll get back to you soon.");
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      }
+    });
   };
 
   return (
@@ -47,14 +56,6 @@ export default function ContactForm() {
       <h2 className="font-raleway font-bold text-xl sm:text-2xl text-foreground mb-6">
         Send Us a Message
       </h2>
-
-      {isSubmitted && (
-        <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/30 rounded-xl">
-          <p className="font-merriweather-sans text-sm text-emerald-700 dark:text-emerald-400">
-            Thank you! Your message has been sent. We&apos;ll get back to you soon.
-          </p>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Name & Email Row */}
@@ -117,10 +118,10 @@ export default function ContactForm() {
               Select a topic
             </option>
             <option value="general">General Inquiry</option>
-            <option value="race">Race & Events</option>
+            <option value="race-info">Race & Events</option>
             <option value="partnership">Partnership / Sponsorship</option>
-            <option value="support">Technical Support</option>
-            <option value="feedback">Feedback & Suggestions</option>
+            <option value="technical">Technical Support</option>
+            <option value="other">Other</option>
           </select>
         </div>
 
@@ -147,12 +148,12 @@ export default function ContactForm() {
         {/* Submit Button */}
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isPending}
           className="font-raleway font-bold text-base bg-[#FF5733] text-white hover:bg-[#E84E2E] transition-all px-8 py-3 rounded-full cursor-pointer shadow-md shadow-[#FF5733]/20 hover:shadow-lg hover:shadow-[#FF5733]/30 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2"
         >
-          {isSubmitting ? (
+          {isPending ? (
             <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
               Sending...
             </>
           ) : (

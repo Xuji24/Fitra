@@ -1,13 +1,27 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/shadcn/button";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { signIn, signInWithGoogle } from "@/app/(auth)/actions";
 import LoginInput from "./login-input";
+
+const loginErrors: Record<string, string> = {
+  "Invalid login credentials": "Incorrect email or password.",
+  "Email not confirmed": "Please verify your email before signing in.",
+  "Captcha verification failed.": "Please complete the captcha verification.",
+  "Please complete the captcha.": "Please complete the captcha verification.",
+};
+
+function getError(error: string): string {
+  if (error.startsWith("Too many attempts")) return error;
+  return loginErrors[error] ?? "Something went wrong. Please try again.";
+}
 
 interface FormErrors {
   email?: string;
@@ -23,7 +37,6 @@ function validateEmail(email: string): string | undefined {
 
 function validatePassword(password: string): string | undefined {
   if (!password) return "Password is required";
-  if (password.length < 6) return "Password must be at least 6 characters";
   return undefined;
 }
 
@@ -32,9 +45,17 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptcha>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("verified") === "true") {
+      toast.success("Your email has been verified! You can now log in.");
+      window.history.replaceState(null, "", "/login");
+    }
+  }, [searchParams]);
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
@@ -53,23 +74,33 @@ export default function LoginForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitted(true);
-    setAuthError(null);
 
     const emailError = validateEmail(email);
     const passwordError = validatePassword(password);
-    const newErrors: FormErrors = { email: emailError, password: passwordError };
+    const newErrors: FormErrors = {
+      email: emailError,
+      password: passwordError,
+    };
     setErrors(newErrors);
 
     if (emailError || passwordError) return;
+
+    if (!captchaToken) {
+      toast.error(getError("Please complete the captcha."));
+      return;
+    }
 
     startTransition(async () => {
       const formData = new FormData();
       formData.append("email", email);
       formData.append("password", password);
+      formData.append("captchaToken", captchaToken);
 
       const result = await signIn(formData);
       if (!result.success && result.error) {
-        setAuthError(result.error);
+        toast.error(getError(result.error));
+        captchaRef.current?.resetCaptcha();
+        setCaptchaToken(null);
       }
     });
   };
@@ -78,20 +109,13 @@ export default function LoginForm() {
     startTransition(async () => {
       const result = await signInWithGoogle();
       if (!result.success && result.error) {
-        setAuthError(result.error);
+        toast.error(getError(result.error));
       }
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full">
-      {/* Auth Error */}
-      {authError && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 animate-slide-up">
-          <p className="text-sm text-red-500 font-merriweather-sans">{authError}</p>
-        </div>
-      )}
-
       {/* Email Input */}
       <div className="animate-slide-up animation-delay-100">
         <LoginInput
@@ -126,6 +150,16 @@ export default function LoginForm() {
         </Link>
       </div>
 
+      {/* hCaptcha */}
+      <div className="flex justify-center animate-slide-up animation-delay-250">
+        <HCaptcha
+          sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+          onVerify={(token) => setCaptchaToken(token)}
+          onExpire={() => setCaptchaToken(null)}
+          ref={captchaRef}
+        />
+      </div>
+
       {/* Login Button */}
       <div className="animate-slide-up animation-delay-300">
         <Button
@@ -155,12 +189,7 @@ export default function LoginForm() {
           variant="outline"
           className="w-full py-4 rounded-xl border border-black/5 dark:border-white/5 bg-[#F5F5F0] dark:bg-[#1C1C1E] hover:bg-[#EBEBEB] dark:hover:bg-[#2A2A2E] text-[#1A1A1A] dark:text-white font-raleway font-semibold text-sm gap-3 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-50"
         >
-          <Image
-            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-            alt="Google"
-            width={20}
-            height={20}
-          />
+          <Image src="/icons/google.svg" alt="Google" width={20} height={20} />
           Google
         </Button>
       </div>

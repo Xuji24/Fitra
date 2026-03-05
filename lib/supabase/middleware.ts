@@ -50,23 +50,21 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: DO NOT REMOVE auth.getUser()
   // Removing this will cause expired sessions to never refresh,
   // leading to random logouts.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // Optional: redirect unauthenticated users away from protected routes.
-  // Uncomment and customise the paths below when ready.
-  //
-  // if (
-  //   !user &&
-  //   !request.nextUrl.pathname.startsWith("/login") &&
-  //   !request.nextUrl.pathname.startsWith("/signup") &&
-  //   !request.nextUrl.pathname.startsWith("/forgot-password") &&
-  //   !request.nextUrl.pathname.startsWith("/auth") &&
-  //   !request.nextUrl.pathname.startsWith("/api")
-  // ) {
-  //   const url = request.nextUrl.clone();
-  //   url.pathname = "/login";
-  //   return NextResponse.redirect(url);
-  // }
+  // Redirect unauthenticated users away from protected routes
+  const protectedPaths = ["/profile", "/settings", "/activities"];
+  const isProtected = protectedPaths.some((p) =>
+    request.nextUrl.pathname.startsWith(p),
+  );
+
+  if (!user && isProtected) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
 
   // IMPORTANT: You *must* return the supabaseResponse object as-is.
   // If you create a new response, copy cookies over:

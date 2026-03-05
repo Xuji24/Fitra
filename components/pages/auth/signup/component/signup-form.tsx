@@ -1,13 +1,33 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/shadcn/button";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { signUp, signInWithGoogle } from "@/app/(auth)/actions";
+import { validatePasswordStrength } from "@/lib/validators";
+
+const signupErrors: Record<string, string> = {
+  "User already registered": "An account with this email already exists.",
+  "Email rate limit exceeded": "Too many requests. Please try again later.",
+  "Captcha verification failed.": "Please complete the captcha verification.",
+  "Please complete the captcha.": "Please complete the captcha verification.",
+  "Must be at least 8 characters": "Password must be at least 8 characters.",
+  "Must include an uppercase letter": "Password must include an uppercase letter.",
+  "Must include a lowercase letter": "Password must include a lowercase letter.",
+  "Must include a number": "Password must include a number.",
+  "Must include a symbol": "Password must include a symbol.",
+};
+
+function getError(error: string): string {
+  if (error.startsWith("Too many attempts")) return error;
+  return signupErrors[error] ?? "Something went wrong. Please try again.";
+}
 import LoginInput from "@/components/pages/auth/login/component/login-input";
+import PasswordStrengthIndicator from "@/components/password-strength-indicator";
 
 interface FormErrors {
   email?: string;
@@ -23,14 +43,12 @@ function validateEmail(email: string): string | undefined {
 }
 
 function validatePassword(password: string): string | undefined {
-  if (!password) return "Password is required";
-  if (password.length < 6) return "Password must be at least 6 characters";
-  return undefined;
+  return validatePasswordStrength(password);
 }
 
 function validateConfirmPassword(
   password: string,
-  confirmPassword: string
+  confirmPassword: string,
 ): string | undefined {
   if (!confirmPassword) return "Please confirm your password";
   if (password !== confirmPassword) return "Passwords do not match";
@@ -43,10 +61,9 @@ export default function SignUpForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptcha>(null);
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
@@ -84,7 +101,7 @@ export default function SignUpForm() {
     const passwordError = validatePassword(password);
     const confirmPasswordError = validateConfirmPassword(
       password,
-      confirmPassword
+      confirmPassword,
     );
     const newErrors: FormErrors = {
       email: emailError,
@@ -95,19 +112,24 @@ export default function SignUpForm() {
 
     if (emailError || passwordError || confirmPasswordError) return;
 
+    if (!captchaToken) {
+      toast.error(getError("Please complete the captcha."));
+      return;
+    }
+
     startTransition(async () => {
       const formData = new FormData();
       formData.append("email", email);
       formData.append("password", password);
+      formData.append("captchaToken", captchaToken);
 
       const result = await signUp(formData);
       if (!result.success && result.error) {
-        setAuthError(result.error);
+        toast.error(getError(result.error));
+        captchaRef.current?.resetCaptcha();
+        setCaptchaToken(null);
       } else if (result.success) {
-        setSuccessMessage("Check your email to confirm your account.");
-        if (result.redirectTo) {
-          setTimeout(() => router.push(result.redirectTo!), 2000);
-        }
+        toast.success("Check your email for a confirmation link.");
       }
     });
   };
@@ -116,27 +138,13 @@ export default function SignUpForm() {
     startTransition(async () => {
       const result = await signInWithGoogle();
       if (!result.success && result.error) {
-        setAuthError(result.error);
+        toast.error(getError(result.error));
       }
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 w-full">
-      {/* Auth Error */}
-      {authError && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 animate-slide-up">
-          <p className="text-sm text-red-500 font-merriweather-sans">{authError}</p>
-        </div>
-      )}
-
-      {/* Success Message */}
-      {successMessage && (
-        <div className="bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 animate-slide-up">
-          <p className="text-sm text-green-600 dark:text-green-400 font-merriweather-sans">{successMessage}</p>
-        </div>
-      )}
-
       {/* Email Input */}
       <div className="animate-slide-up animation-delay-100">
         <LoginInput
@@ -160,8 +168,6 @@ export default function SignUpForm() {
           error={errors.password}
         />
       </div>
-
-      {/* Confirm Password Input */}
       <div className="animate-slide-up animation-delay-300">
         <LoginInput
           label="Confirm Password"
@@ -170,6 +176,17 @@ export default function SignUpForm() {
           value={confirmPassword}
           onChange={handleConfirmPasswordChange}
           error={errors.confirmPassword}
+        />
+      </div>
+      <PasswordStrengthIndicator password={password} />
+
+      {/* hCaptcha */}
+      <div className="flex justify-center animate-slide-up animation-delay-250">
+        <HCaptcha
+          sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+          onVerify={(token) => setCaptchaToken(token)}
+          onExpire={() => setCaptchaToken(null)}
+          ref={captchaRef}
         />
       </div>
 
@@ -202,12 +219,7 @@ export default function SignUpForm() {
           variant="outline"
           className="w-full py-4 rounded-xl border border-black/5 dark:border-white/5 bg-[#F5F5F0] dark:bg-[#1C1C1E] hover:bg-[#EBEBEB] dark:hover:bg-[#2A2A2E] text-[#1A1A1A] dark:text-white font-raleway font-semibold text-sm gap-3 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-50"
         >
-          <Image
-            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-            alt="Google"
-            width={20}
-            height={20}
-          />
+          <Image src="/icons/google.svg" alt="Google" width={20} height={20} />
           Google
         </Button>
       </div>

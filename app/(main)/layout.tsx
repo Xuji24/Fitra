@@ -8,6 +8,7 @@ import {
 import "../globals.css";
 import Footer from "@/components/seraui/footer";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 import ScrollToTop from "@/components/scroll-to-top";
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,6 +58,7 @@ export default function RootLayout({
           {children}
           <Footer />
           <ScrollToTop />
+          <Toaster position="top-right" richColors closeButton />
         </ThemeProvider>
       </body>
     </html>

@@ -4,15 +4,13 @@ import { useState, useMemo } from "react";
 import Navbar from "@/components/navbar";
 import RaceCard from "./component/race-card";
 import RaceFilter from "./component/race-filter";
-import RaceModal from "./component/race-modal";
-import { RaceEvent, RaceCategory } from "@/utils/types/race-types";
+import { RaceCategory } from "@/utils/types/race-types";
 import { racesData } from "@/data/races-data";
 
 export default function RacePage() {
   const [selectedCategory, setSelectedCategory] =
     useState<RaceCategory>("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRace, setSelectedRace] = useState<RaceEvent | null>(null);
 
   const filteredRaces = useMemo(() => {
     return racesData.filter((race) => {
@@ -55,7 +53,6 @@ export default function RacePage() {
               <RaceCard
                 key={race.id}
                 race={race}
-                onViewDetails={setSelectedRace}
               />
             ))}
           </div>
@@ -70,9 +67,6 @@ export default function RacePage() {
           </div>
         )}
       </div>
-
-      {/* Race Detail Modal */}
-      <RaceModal race={selectedRace} onClose={() => setSelectedRace(null)} />
     </div>
   );
 }

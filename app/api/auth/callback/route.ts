@@ -17,8 +17,12 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
   const type = searchParams.get("type"); // "recovery" for password reset
+
+  // Validate redirect target to prevent open redirects
+  const rawNext = searchParams.get("next") ?? "/";
+  const next =
+    rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
 
   if (code) {
     const supabase = await createClient();
@@ -29,7 +33,11 @@ export async function GET(request: NextRequest) {
       if (type === "recovery") {
         return NextResponse.redirect(`${origin}/reset-password`);
       }
-      // Normal flow → redirect to home or specified page
+      // Email signup verification → redirect to login with verified flag
+      if (type === "signup") {
+        return NextResponse.redirect(`${origin}/login?verified=true`);
+      }
+      // Normal flow (OAuth, etc.) → redirect to home or specified page
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

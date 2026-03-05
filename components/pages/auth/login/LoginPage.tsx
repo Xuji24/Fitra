@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import LoginForm from "./component/login-form";
 import LoginFooter from "./component/login-footer";
 import LoginHero from "./component/login-hero";
@@ -25,7 +26,9 @@ export default function LoginPage() {
             </p>
 
             {/* Login Form */}
-            <LoginForm />
+            <Suspense>
+              <LoginForm />
+            </Suspense>
           </div>
         </div>
 

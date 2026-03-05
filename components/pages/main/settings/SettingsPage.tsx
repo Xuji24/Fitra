@@ -1,16 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Lock, Eye, EyeOff, Loader2, CheckCircle, AlertCircle, Shield } from "lucide-react";
+import { validatePasswordStrength } from "@/lib/validators";
+import { toast } from "sonner";
+import { changePassword } from "@/app/(auth)/actions";
+
+const settingsErrors: Record<string, string> = {
+  "New password should be different from the old password.":
+    "Please choose a different password.",
+  "Must be at least 8 characters": "Password must be at least 8 characters.",
+  "Must include an uppercase letter": "Password must include an uppercase letter.",
+  "Must include a lowercase letter": "Password must include a lowercase letter.",
+  "Must include a number": "Password must include a number.",
+  "Must include a symbol": "Password must include a symbol.",
+};
+
+function getError(error: string): string {
+  if (error.startsWith("Too many attempts")) return error;
+  return settingsErrors[error] ?? "Something went wrong. Please try again.";
+}
+import { Lock, Eye, EyeOff, Loader2, Shield } from "lucide-react";
 import Navbar from "@/components/navbar";
+import PasswordStrengthIndicator from "@/components/password-strength-indicator";
 
 export default function SettingsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -23,7 +41,9 @@ export default function SettingsPage() {
   useEffect(() => {
     async function checkAuth() {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         router.push("/login");
@@ -36,46 +56,39 @@ export default function SettingsPage() {
     checkAuth();
   }, [router]);
 
-  const handlePasswordChange = async () => {
-    setToast(null);
-
-    // Validate
-    if (!newPassword || !confirmPassword) {
-      setToast({ type: "error", message: "Please fill in all password fields" });
+  const handlePasswordChange = () => {
+    // Client-side validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Please fill in all password fields.");
       return;
     }
 
-    if (newPassword.length < 6) {
-      setToast({ type: "error", message: "New password must be at least 6 characters" });
+    const passwordError = validatePasswordStrength(newPassword);
+    if (passwordError) {
+      toast.error(getError(passwordError));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setToast({ type: "error", message: "New passwords do not match" });
+      toast.error("New passwords do not match.");
       return;
     }
 
-    setSaving(true);
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append("currentPassword", currentPassword);
+      formData.append("newPassword", newPassword);
 
-    const supabase = createClient();
-
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
+      const result = await changePassword(formData);
+      if (!result.success && result.error) {
+        toast.error(getError(result.error));
+      } else {
+        toast.success("Password updated successfully.");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
     });
-
-    if (error) {
-      setToast({ type: "error", message: error.message });
-      setSaving(false);
-      return;
-    }
-
-    setToast({ type: "success", message: "Password updated successfully" });
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setSaving(false);
-
-    setTimeout(() => setToast(null), 3000);
   };
 
   if (loading) {
@@ -144,7 +157,11 @@ export default function SettingsPage() {
                     onClick={() => setShowCurrent(!showCurrent)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#1A1A1A]/30 dark:text-white/20 hover:text-[#1A1A1A]/60 dark:hover:text-white/40 transition-colors cursor-pointer"
                   >
-                    {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showCurrent ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -168,12 +185,13 @@ export default function SettingsPage() {
                     onClick={() => setShowNew(!showNew)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#1A1A1A]/30 dark:text-white/20 hover:text-[#1A1A1A]/60 dark:hover:text-white/40 transition-colors cursor-pointer"
                   >
-                    {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showNew ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
-                <p className="mt-1.5 text-[10px] text-[#1A1A1A]/30 dark:text-white/20 font-merriweather-sans">
-                  Must be at least 6 characters
-                </p>
               </div>
 
               {/* Confirm New Password */}
@@ -195,36 +213,23 @@ export default function SettingsPage() {
                     onClick={() => setShowConfirm(!showConfirm)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#1A1A1A]/30 dark:text-white/20 hover:text-[#1A1A1A]/60 dark:hover:text-white/40 transition-colors cursor-pointer"
                   >
-                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirm ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
-
-              {/* Toast */}
-              {toast && (
-                <div
-                  className={`flex items-center gap-2 p-3 rounded-xl border text-sm ${
-                    toast.type === "success"
-                      ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800/30 text-emerald-600 dark:text-emerald-400"
-                      : "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800/30 text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {toast.type === "success" ? (
-                    <CheckCircle className="w-4 h-4 shrink-0" />
-                  ) : (
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                  )}
-                  <p className="font-merriweather-sans text-xs">{toast.message}</p>
-                </div>
-              )}
+              <PasswordStrengthIndicator password={newPassword} />
 
               {/* Save Button */}
               <button
                 onClick={handlePasswordChange}
-                disabled={saving}
+                disabled={isPending}
                 className="w-full py-3 rounded-xl bg-[#FF5733] hover:bg-[#E84E2E] disabled:opacity-50 text-white text-sm font-semibold font-raleway transition-colors cursor-pointer flex items-center justify-center gap-2"
               >
-                {saving ? (
+                {isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Updating...

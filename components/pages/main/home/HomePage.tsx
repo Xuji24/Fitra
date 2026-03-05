@@ -4,16 +4,23 @@ import WhyJoinUs from "./component/why-join-us";
 import Community from "./component/community";
 import Sponsor from "./component/sponsor";
 import CTASection from "./component/cta-section";
+import { createClient } from "@/lib/supabase/server";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
+
   return (
     <div>
       <Navbar />
-      <HeroSection />
+      <HeroSection isLoggedIn={isLoggedIn} />
       <WhyJoinUs />
       <Community />
       <Sponsor />
-      <CTASection />
+      <CTASection isLoggedIn={isLoggedIn} />
     </div>
   );
 }

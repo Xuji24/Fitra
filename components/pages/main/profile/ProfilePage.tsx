@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { User, Mail, Save, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { User, Mail, Save, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import Navbar from "@/components/navbar";
 
@@ -18,8 +19,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const [profile, setProfile] = useState<ProfileData>({
     firstName: "",
@@ -31,7 +31,9 @@ export default function ProfilePage() {
   useEffect(() => {
     async function loadProfile() {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         router.push("/login");
@@ -47,7 +49,8 @@ export default function ProfilePage() {
         .eq("id", user.id)
         .single();
 
-      const fullName = profileData?.full_name || user.user_metadata?.full_name || "";
+      const fullName =
+        profileData?.full_name || user.user_metadata?.full_name || "";
       const nameParts = fullName.trim().split(/\s+/);
       const firstName = nameParts[0] || "";
       const lastName = nameParts.slice(1).join(" ") || "";
@@ -65,39 +68,32 @@ export default function ProfilePage() {
     loadProfile();
   }, [router]);
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!user) return;
 
-    setSaving(true);
-    setToast(null);
+    startTransition(async () => {
+      const supabase = createClient();
+      const fullName = `${profile.firstName} ${profile.lastName}`.trim();
 
-    const supabase = createClient();
-    const fullName = `${profile.firstName} ${profile.lastName}`.trim();
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          full_name: fullName,
+          username: profile.username || null,
+        })
+        .eq("id", user.id);
 
-    // Update profiles table
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .update({
-        full_name: fullName,
-        username: profile.username || null,
-      })
-      .eq("id", user.id);
+      if (profileError) {
+        toast.error("Failed to update profile. Please try again.");
+        return;
+      }
 
-    if (profileError) {
-      setToast({ type: "error", message: profileError.message });
-      setSaving(false);
-      return;
-    }
+      await supabase.auth.updateUser({
+        data: { full_name: fullName },
+      });
 
-    // Also update auth user metadata so navbar reflects changes
-    await supabase.auth.updateUser({
-      data: { full_name: fullName },
+      toast.success("Profile updated successfully.");
     });
-
-    setToast({ type: "success", message: "Profile updated successfully" });
-    setSaving(false);
-
-    setTimeout(() => setToast(null), 3000);
   };
 
   if (loading) {
@@ -111,7 +107,9 @@ export default function ProfilePage() {
     );
   }
 
-  const initial = (profile.firstName || profile.email || "U").charAt(0).toUpperCase();
+  const initial = (profile.firstName || profile.email || "U")
+    .charAt(0)
+    .toUpperCase();
 
   return (
     <div>
@@ -159,7 +157,9 @@ export default function ProfilePage() {
                   <input
                     type="text"
                     value={profile.firstName}
-                    onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                    onChange={(e) =>
+                      setProfile({ ...profile, firstName: e.target.value })
+                    }
                     placeholder="Enter your first name"
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#F5F5F0] dark:bg-[#2A2A2E] text-sm text-[#1A1A1A] dark:text-white placeholder:text-[#1A1A1A]/30 dark:placeholder:text-white/20 border-0 focus:ring-2 focus:ring-[#FF5733] outline-none transition-all font-merriweather-sans"
                   />
@@ -176,7 +176,9 @@ export default function ProfilePage() {
                   <input
                     type="text"
                     value={profile.lastName}
-                    onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+                    onChange={(e) =>
+                      setProfile({ ...profile, lastName: e.target.value })
+                    }
                     placeholder="Enter your last name"
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#F5F5F0] dark:bg-[#2A2A2E] text-sm text-[#1A1A1A] dark:text-white placeholder:text-[#1A1A1A]/30 dark:placeholder:text-white/20 border-0 focus:ring-2 focus:ring-[#FF5733] outline-none transition-all font-merriweather-sans"
                   />
@@ -211,37 +213,21 @@ export default function ProfilePage() {
                 <input
                   type="text"
                   value={profile.username}
-                  onChange={(e) => setProfile({ ...profile, username: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, username: e.target.value })
+                  }
                   placeholder="Choose a username"
                   className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] dark:bg-[#2A2A2E] text-sm text-[#1A1A1A] dark:text-white placeholder:text-[#1A1A1A]/30 dark:placeholder:text-white/20 border-0 focus:ring-2 focus:ring-[#FF5733] outline-none transition-all font-merriweather-sans"
                 />
               </div>
 
-              {/* Toast */}
-              {toast && (
-                <div
-                  className={`flex items-center gap-2 p-3 rounded-xl border text-sm ${
-                    toast.type === "success"
-                      ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800/30 text-emerald-600 dark:text-emerald-400"
-                      : "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800/30 text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {toast.type === "success" ? (
-                    <CheckCircle className="w-4 h-4 shrink-0" />
-                  ) : (
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                  )}
-                  <p className="font-merriweather-sans text-xs">{toast.message}</p>
-                </div>
-              )}
-
               {/* Save Button */}
               <button
                 onClick={handleSave}
-                disabled={saving}
+                disabled={isPending}
                 className="w-full py-3 rounded-xl bg-[#FF5733] hover:bg-[#E84E2E] disabled:opacity-50 text-white text-sm font-semibold font-raleway transition-colors cursor-pointer flex items-center justify-center gap-2"
               >
-                {saving ? (
+                {isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Saving...
