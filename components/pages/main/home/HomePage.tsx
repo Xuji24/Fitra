@@ -1,4 +1,3 @@
-import Navbar from "@/components/navbar";
 import HeroSection from "./component/hero-section";
 import WhyJoinUs from "./component/why-join-us";
 import Community from "./component/community";
@@ -15,7 +14,6 @@ export default async function HomePage() {
 
   return (
     <div>
-      <Navbar />
       <HeroSection isLoggedIn={isLoggedIn} />
       <WhyJoinUs />
       <Community />

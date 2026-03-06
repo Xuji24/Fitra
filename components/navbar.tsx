@@ -11,14 +11,23 @@ import type { User } from "@supabase/supabase-js";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string>("runner");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const supabase = createClient();
 
-    // Get initial session
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    // Get initial session + role
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       setUser(user);
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        if (data?.role) setUserRole(data.role);
+      }
       setLoading(false);
     });
 
@@ -27,6 +36,7 @@ export default function Navbar() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (!session?.user) setUserRole("runner");
     });
 
     return () => subscription.unsubscribe();
@@ -70,6 +80,16 @@ export default function Navbar() {
         >
           Contact
         </Link>
+
+        {/* Organizer link — only for organizer/admin */}
+        {(userRole === "organizer" || userRole === "admin") && (
+          <Link
+            href="/organizer"
+            className="font-raleway font-bold text-sm lg:text-base text-[#FFB800] hover:text-[#FF5733] transition-colors"
+          >
+            Organizer
+          </Link>
+        )}
 
         {/* Theme Toggle */}
         <ThemeToggle />
@@ -132,6 +152,15 @@ export default function Navbar() {
           >
             Contact
           </Link>
+          {/* Organizer link — only for organizer/admin */}
+          {(userRole === "organizer" || userRole === "admin") && (
+            <Link
+              href="/organizer"
+              className="font-raleway font-bold text-sm text-[#FFB800] hover:text-[#FF5733] transition-colors py-2"
+            >
+              Organizer
+            </Link>
+          )}
           <div className="flex items-center gap-3 py-2">
             <ThemeToggle />
             <span className="font-raleway font-bold text-sm text-white">

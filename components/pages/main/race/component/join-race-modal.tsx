@@ -5,11 +5,13 @@ import { X, User, Mail, Phone, Shirt, CreditCard, Loader2 } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import { RaceEvent } from "@/utils/types/race-types";
 import { toast } from "sonner";
+import { registerForRace } from "@/app/(main)/actions";
 
 interface Props {
   race: RaceEvent;
   open: boolean;
   onClose: () => void;
+  onRegistered?: () => void;
 }
 
 const shirtSizes = ["S", "M", "L", "XL", "2XL"];
@@ -35,7 +37,12 @@ interface FormErrors {
   paymentMethod?: string;
 }
 
-export default function JoinRaceModal({ race, open, onClose }: Props) {
+export default function JoinRaceModal({
+  race,
+  open,
+  onClose,
+  onRegistered,
+}: Props) {
   const [form, setForm] = useState<FormData>({
     fullName: "",
     email: "",
@@ -87,7 +94,8 @@ export default function JoinRaceModal({ race, open, onClose }: Props) {
       newErrors.phone = "Enter a valid phone number";
     }
     if (!form.shirtSize) newErrors.shirtSize = "Select a shirt size";
-    if (!form.paymentMethod) newErrors.paymentMethod = "Select a payment method";
+    if (!form.paymentMethod)
+      newErrors.paymentMethod = "Select a payment method";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -98,15 +106,33 @@ export default function JoinRaceModal({ race, open, onClose }: Props) {
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    // Simulate submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const result = await registerForRace({
+      raceId: race.dbId,
+      fullName: form.fullName,
+      email: form.email,
+      phone: form.phone,
+      shirtSize: form.shirtSize,
+      paymentMethod: form.paymentMethod,
+    });
     setSubmitting(false);
-    toast.success("Registration submitted! Check your email for confirmation.");
+
+    if (!result.success) {
+      toast.error(result.error ?? "Registration failed.");
+      return;
+    }
+
+    toast.success("Registration submitted successfully!");
     onClose();
-    // Reset form
-    setForm({ fullName: "", email: "", phone: "", shirtSize: "", paymentMethod: "" });
+    setForm({
+      fullName: "",
+      email: "",
+      phone: "",
+      shirtSize: "",
+      paymentMethod: "",
+    });
     setStep("form");
     setErrors({});
+    onRegistered?.();
   };
 
   const handleClose = () => {
@@ -118,7 +144,10 @@ export default function JoinRaceModal({ race, open, onClose }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" onClick={handleClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      onClick={handleClose}
+    >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
 
       <div
@@ -162,7 +191,9 @@ export default function JoinRaceModal({ race, open, onClose }: Props) {
                   />
                 </div>
                 {errors.fullName && (
-                  <p className="text-xs text-red-500 mt-1 font-merriweather-sans">{errors.fullName}</p>
+                  <p className="text-xs text-red-500 mt-1 font-merriweather-sans">
+                    {errors.fullName}
+                  </p>
                 )}
               </div>
 
@@ -182,7 +213,9 @@ export default function JoinRaceModal({ race, open, onClose }: Props) {
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-xs text-red-500 mt-1 font-merriweather-sans">{errors.email}</p>
+                  <p className="text-xs text-red-500 mt-1 font-merriweather-sans">
+                    {errors.email}
+                  </p>
                 )}
               </div>
 
@@ -202,7 +235,9 @@ export default function JoinRaceModal({ race, open, onClose }: Props) {
                   />
                 </div>
                 {errors.phone && (
-                  <p className="text-xs text-red-500 mt-1 font-merriweather-sans">{errors.phone}</p>
+                  <p className="text-xs text-red-500 mt-1 font-merriweather-sans">
+                    {errors.phone}
+                  </p>
                 )}
               </div>
 
@@ -229,7 +264,9 @@ export default function JoinRaceModal({ race, open, onClose }: Props) {
                   ))}
                 </div>
                 {errors.shirtSize && (
-                  <p className="text-xs text-red-500 mt-1 font-merriweather-sans">{errors.shirtSize}</p>
+                  <p className="text-xs text-red-500 mt-1 font-merriweather-sans">
+                    {errors.shirtSize}
+                  </p>
                 )}
               </div>
 
@@ -267,7 +304,9 @@ export default function JoinRaceModal({ race, open, onClose }: Props) {
                   ))}
                 </div>
                 {errors.paymentMethod && (
-                  <p className="text-xs text-red-500 mt-1 font-merriweather-sans">{errors.paymentMethod}</p>
+                  <p className="text-xs text-red-500 mt-1 font-merriweather-sans">
+                    {errors.paymentMethod}
+                  </p>
                 )}
               </div>
 
@@ -289,30 +328,55 @@ export default function JoinRaceModal({ race, open, onClose }: Props) {
                 </h3>
                 <div className="space-y-2.5 text-sm font-merriweather-sans">
                   <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Name</span>
-                    <span className="text-foreground font-semibold">{form.fullName}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Email</span>
-                    <span className="text-foreground font-semibold">{form.email}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Phone</span>
-                    <span className="text-foreground font-semibold">{form.phone}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Shirt Size</span>
-                    <span className="text-foreground font-semibold">{form.shirtSize}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Payment</span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      Name
+                    </span>
                     <span className="text-foreground font-semibold">
-                      {paymentMethods.find((m) => m.id === form.paymentMethod)?.label}
+                      {form.fullName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">
+                      Email
+                    </span>
+                    <span className="text-foreground font-semibold">
+                      {form.email}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">
+                      Phone
+                    </span>
+                    <span className="text-foreground font-semibold">
+                      {form.phone}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">
+                      Shirt Size
+                    </span>
+                    <span className="text-foreground font-semibold">
+                      {form.shirtSize}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">
+                      Payment
+                    </span>
+                    <span className="text-foreground font-semibold">
+                      {
+                        paymentMethods.find((m) => m.id === form.paymentMethod)
+                          ?.label
+                      }
                     </span>
                   </div>
                   <div className="pt-2 border-t border-gray-200 dark:border-white/10 flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Race</span>
-                    <span className="text-foreground font-semibold">{race.title}</span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      Race
+                    </span>
+                    <span className="text-foreground font-semibold">
+                      {race.title}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -331,7 +395,7 @@ export default function JoinRaceModal({ race, open, onClose }: Props) {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="flex-[2] py-4 rounded-xl bg-[#FF5733] text-white font-raleway font-bold text-base hover:bg-[#E84E2E] hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-2 py-4 rounded-xl bg-[#FF5733] text-white font-raleway font-bold text-base hover:bg-[#E84E2E] hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? (
                     <Loader2 className="w-5 h-5 animate-spin" />

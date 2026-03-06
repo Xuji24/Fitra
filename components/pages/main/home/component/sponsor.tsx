@@ -1,7 +1,35 @@
 import Image from "next/image";
+import { createClient } from "@/lib/supabase/server";
 import { sponsorsData } from "@/data/sponsors-data";
 
-export default function Sponsor() {
+export default async function Sponsor() {
+  let sponsors: { id: string; name: string; logo_url: string }[] = [];
+
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("sponsors")
+      .select("id, name, logo_url")
+      .eq("active", true)
+      .order("display_order");
+    if (data && data.length > 0) {
+      sponsors = data;
+    }
+  } catch {
+    // Supabase fetch failed — fall back to static data
+  }
+
+  const useFallback = sponsors.length === 0;
+  if (useFallback) {
+    sponsors = sponsorsData.map((s) => ({
+      id: String(s.id),
+      name: s.name,
+      logo_url: s.logo,
+    }));
+  }
+
+  if (sponsors.length === 0) return null;
+
   return (
     <div className="w-full bg-[#F2F2EF] dark:bg-[#1C1C1E] py-14 sm:py-16 md:py-20 px-4 sm:px-6 md:px-10 lg:px-16">
       <div className="max-w-6xl mx-auto">
@@ -14,13 +42,13 @@ export default function Sponsor() {
 
         {/* Logo Row — clean, no cards */}
         <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-10 md:gap-14 lg:gap-16">
-          {sponsorsData.map((sponsor) => (
+          {sponsors.map((sponsor) => (
             <div
               key={sponsor.id}
               className="group flex justify-center items-center"
             >
               <Image
-                src={sponsor.logo}
+                src={sponsor.logo_url}
                 alt={sponsor.name}
                 width={160}
                 height={80}

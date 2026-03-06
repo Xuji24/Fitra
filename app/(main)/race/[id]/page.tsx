@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { racesData } from "@/data/races-data";
 import RaceDetailPage from "@/components/pages/main/race/RaceDetailPage";
+import { checkRaceRegistration } from "@/app/(main)/actions";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -16,5 +17,7 @@ export default async function RaceDetail({ params }: Props) {
 
   if (!race) notFound();
 
-  return <RaceDetailPage race={race} />;
+  const { registered } = await checkRaceRegistration(race.dbId);
+
+  return <RaceDetailPage race={race} initialRegistered={registered} />;
 }

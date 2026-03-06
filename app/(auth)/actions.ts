@@ -60,6 +60,17 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
     return { success: false, error: error.message };
   }
 
+  // Check if admin → redirect to admin panel
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", (await supabase.auth.getUser()).data.user!.id)
+    .single();
+
+  if (profile?.role === "admin") {
+    redirect("/admin");
+  }
+
   redirect("/");
 }
 

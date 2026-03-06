@@ -1,7 +1,6 @@
 "use client";
 
-import { activityLogData } from "@/data/activities-data";
-import type { ActivityType } from "@/data/activities-data";
+import type { ActivityType, ActivityEntry } from "@/data/activities-data";
 
 const typeLabels: Record<ActivityType, { label: string; cls: string }> = {
   run: { label: "Run", cls: "bg-[#FF5733]/10 text-[#FF5733]" },
@@ -18,15 +17,34 @@ function formatDate(iso: string) {
   });
 }
 
-const ActivityLog = () => {
+const ActivityLog = ({ entries: rawEntries }: { entries: ActivityEntry[] }) => {
+  if (rawEntries.length === 0) {
+    return (
+      <div>
+        <h2 className="text-lg font-bold text-[#1A1A1A] dark:text-white font-raleway mb-5">
+          Activity Log
+        </h2>
+        <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/5 dark:border-white/5 p-10 text-center">
+          <p className="text-sm text-[#1A1A1A]/50 dark:text-white/40">
+            No activities logged yet. Import your first workout from Strava!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // Compute running total per entry (cumulative)
-  const entries = activityLogData.reduce<
-    (typeof activityLogData[number] & { cumulative: number })[]
-  >((acc, entry) => {
-    const prev = acc.length > 0 ? acc[acc.length - 1].cumulative : 0;
-    acc.push({ ...entry, cumulative: Math.round((prev + entry.distance) * 10) / 10 });
-    return acc;
-  }, []);
+  const entries = rawEntries.reduce<(ActivityEntry & { cumulative: number })[]>(
+    (acc, entry) => {
+      const prev = acc.length > 0 ? acc[acc.length - 1].cumulative : 0;
+      acc.push({
+        ...entry,
+        cumulative: Math.round((prev + entry.distance) * 10) / 10,
+      });
+      return acc;
+    },
+    [],
+  );
 
   return (
     <div>

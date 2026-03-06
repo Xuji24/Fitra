@@ -6,6 +6,7 @@ import {
   Merriweather_Sans,
 } from "next/font/google";
 import "../globals.css";
+import Navbar from "@/components/navbar";
 import Footer from "@/components/seraui/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
@@ -55,6 +56,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Navbar />
           {children}
           <Footer />
           <ScrollToTop />

@@ -12,6 +12,7 @@ export interface RaceReward {
 
 export interface RaceEvent {
   id: string;
+  dbId: string;
   title: string;
   organizer: string;
   date: string;

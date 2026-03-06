@@ -6,6 +6,7 @@ import { Send } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { submitContactForm } from "@/app/(main)/actions";
+import CustomSelect from "@/components/ui/custom-select";
 
 interface ContactFormData {
   name: string;
@@ -106,23 +107,20 @@ export default function ContactForm() {
           >
             Subject
           </label>
-          <select
-            id="subject"
-            name="subject"
+          <CustomSelect
             value={formData.subject}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#1C1C1E] text-foreground text-sm font-merriweather-sans focus:outline-none focus:ring-2 focus:ring-[#FF5733] focus:border-transparent transition-all appearance-none cursor-pointer"
-          >
-            <option value="" disabled>
-              Select a topic
-            </option>
-            <option value="general">General Inquiry</option>
-            <option value="race-info">Race & Events</option>
-            <option value="partnership">Partnership / Sponsorship</option>
-            <option value="technical">Technical Support</option>
-            <option value="other">Other</option>
-          </select>
+            onChange={(val) =>
+              setFormData((prev) => ({ ...prev, subject: val }))
+            }
+            placeholder="Select a topic"
+            options={[
+              { value: "general", label: "General Inquiry" },
+              { value: "race-info", label: "Race & Events" },
+              { value: "partnership", label: "Partnership / Sponsorship" },
+              { value: "technical", label: "Technical Support" },
+              { value: "other", label: "Other" },
+            ]}
+          />
         </div>
 
         {/* Message */}

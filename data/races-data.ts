@@ -3,6 +3,7 @@ import { RaceEvent } from "@/utils/types/race-types";
 export const racesData: RaceEvent[] = [
   {
     id: "1",
+    dbId: "a1b2c3d4-0001-4000-8000-000000000001",
     title: "Manila Sunrise Marathon 2026",
     organizer: "RunPH Events",
     date: "March 15, 2026",
@@ -22,11 +23,13 @@ export const racesData: RaceEvent[] = [
     rewards: {
       medal: {
         name: "Sunrise Finisher's Medal",
-        description: "Gold-plated medal featuring the Manila skyline at dawn with an engraved distance marker.",
+        description:
+          "Gold-plated medal featuring the Manila skyline at dawn with an engraved distance marker.",
       },
       eCertificate: {
         title: "Official Finisher's E-Certificate",
-        description: "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
+        description:
+          "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
       },
       prizes: [
         "Premium tech shirt for all finishers",
@@ -37,6 +40,7 @@ export const racesData: RaceEvent[] = [
   },
   {
     id: "2",
+    dbId: "a1b2c3d4-0002-4000-8000-000000000002",
     title: "Cebu Island 10K Challenge",
     organizer: "Island Runners PH",
     date: "March 22, 2026",
@@ -56,11 +60,13 @@ export const racesData: RaceEvent[] = [
     rewards: {
       medal: {
         name: "Island Runner Medal",
-        description: "Coastal-themed finisher's medal with a wave design and 10K distance engraving.",
+        description:
+          "Coastal-themed finisher's medal with a wave design and 10K distance engraving.",
       },
       eCertificate: {
         title: "Official Finisher's E-Certificate",
-        description: "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
+        description:
+          "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
       },
       prizes: [
         "Premium tech shirt for all finishers",
@@ -71,6 +77,7 @@ export const racesData: RaceEvent[] = [
   },
   {
     id: "3",
+    dbId: "a1b2c3d4-0003-4000-8000-000000000003",
     title: "BGC Night Run 5K",
     organizer: "Metro Run Club",
     date: "April 5, 2026",
@@ -90,11 +97,13 @@ export const racesData: RaceEvent[] = [
     rewards: {
       medal: {
         name: "Glow Runner Medal",
-        description: "Glow-in-the-dark finisher's medal shaped like a lightning bolt.",
+        description:
+          "Glow-in-the-dark finisher's medal shaped like a lightning bolt.",
       },
       eCertificate: {
         title: "Official Finisher's E-Certificate",
-        description: "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
+        description:
+          "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
       },
       prizes: [
         "Glow-in-the-dark event shirt",
@@ -105,6 +114,7 @@ export const racesData: RaceEvent[] = [
   },
   {
     id: "4",
+    dbId: "a1b2c3d4-0004-4000-8000-000000000004",
     title: "Baguio Half Marathon",
     organizer: "Highland Runners",
     date: "April 12, 2026",
@@ -124,11 +134,13 @@ export const racesData: RaceEvent[] = [
     rewards: {
       medal: {
         name: "Highland Conqueror Medal",
-        description: "Heavy brass medal with mountain ridge engraving and 21K distance marker.",
+        description:
+          "Heavy brass medal with mountain ridge engraving and 21K distance marker.",
       },
       eCertificate: {
         title: "Official Finisher's E-Certificate",
-        description: "Digital certificate with your name, finishing time, elevation profile, and official race results.",
+        description:
+          "Digital certificate with your name, finishing time, elevation profile, and official race results.",
       },
       prizes: [
         "Premium performance shirt",
@@ -139,6 +151,7 @@ export const racesData: RaceEvent[] = [
   },
   {
     id: "5",
+    dbId: "a1b2c3d4-0005-4000-8000-000000000005",
     title: "Davao Durian Dash 5K",
     organizer: "Mindanao Runners",
     date: "April 20, 2026",
@@ -158,11 +171,13 @@ export const racesData: RaceEvent[] = [
     rewards: {
       medal: {
         name: "Durian Dash Medal",
-        description: "Quirky durian-shaped finisher's medal — a collector's item for fun runners.",
+        description:
+          "Quirky durian-shaped finisher's medal — a collector's item for fun runners.",
       },
       eCertificate: {
         title: "Official Finisher's E-Certificate",
-        description: "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
+        description:
+          "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
       },
       prizes: [
         "Event shirt for all finishers",
@@ -173,6 +188,7 @@ export const racesData: RaceEvent[] = [
   },
   {
     id: "6",
+    dbId: "a1b2c3d4-0006-4000-8000-000000000006",
     title: "Subic Bay 10K Classic",
     organizer: "Freeport Runners Assoc.",
     date: "May 3, 2026",
@@ -192,11 +208,13 @@ export const racesData: RaceEvent[] = [
     rewards: {
       medal: {
         name: "Bay Classic Medal",
-        description: "Scenic bay-themed finisher's medal with a tropical design and 10K distance marker.",
+        description:
+          "Scenic bay-themed finisher's medal with a tropical design and 10K distance marker.",
       },
       eCertificate: {
         title: "Official Finisher's E-Certificate",
-        description: "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
+        description:
+          "Digital certificate with your name, finishing time, and official race results. Downloadable and shareable.",
       },
       prizes: [
         "Race kit with tech shirt and visor",

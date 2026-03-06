@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { joinedRacesData } from "@/data/activities-data";
+import type { JoinedRace } from "@/data/activities-data";
 import { X, Check, Loader2, AlertCircle, ExternalLink } from "lucide-react";
+import CustomSelect from "@/components/ui/custom-select";
 
 interface Props {
   open: boolean;
   preselectedRaceId?: string;
+  inProgressRaces: JoinedRace[];
   onClose: () => void;
 }
 
@@ -44,12 +46,15 @@ function formatDate(iso: string): string {
   });
 }
 
-const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
-  const inProgressRaces = joinedRacesData.filter(
-    (r) => r.status === "in-progress"
+const LogActivityPanel = ({
+  open,
+  preselectedRaceId,
+  inProgressRaces,
+  onClose,
+}: Props) => {
+  const [raceId, setRaceId] = useState(
+    preselectedRaceId ?? inProgressRaces[0]?.id ?? "",
   );
-
-  const [raceId, setRaceId] = useState(preselectedRaceId ?? inProgressRaces[0]?.id ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [successDistance, setSuccessDistance] = useState("");
@@ -57,7 +62,8 @@ const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
   // Strava state
   const [stravaConnected, setStravaConnected] = useState<boolean | null>(null); // null = loading
   const [activities, setActivities] = useState<StravaActivity[]>([]);
-  const [selectedActivity, setSelectedActivity] = useState<StravaActivity | null>(null);
+  const [selectedActivity, setSelectedActivity] =
+    useState<StravaActivity | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Sync preselected race when parent changes it
@@ -153,8 +159,8 @@ const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
         // Mark as imported in local list
         setActivities((prev) =>
           prev.map((a) =>
-            a.id === selectedActivity.id ? { ...a, imported: true } : a
-          )
+            a.id === selectedActivity.id ? { ...a, imported: true } : a,
+          ),
         );
 
         setTimeout(() => {
@@ -188,7 +194,11 @@ const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
         <div className="p-5 border-b border-black/5 dark:border-white/5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <svg className="w-5 h-5 text-[#FC4C02]" viewBox="0 0 24 24" fill="currentColor">
+              <svg
+                className="w-5 h-5 text-[#FC4C02]"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
               </svg>
               <h2 className="text-lg font-bold text-[#1A1A1A] dark:text-white font-raleway">
@@ -234,7 +244,11 @@ const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
           <div className="p-5">
             <div className="text-center py-6">
               <div className="w-16 h-16 rounded-2xl bg-[#FC4C02]/10 flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-[#FC4C02]" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  className="w-8 h-8 text-[#FC4C02]"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
                 </svg>
               </div>
@@ -242,13 +256,18 @@ const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
                 Connect to Strava
               </h3>
               <p className="font-merriweather-sans text-sm text-[#1A1A1A]/50 dark:text-white/40 mb-5 max-w-xs mx-auto">
-                Link your Strava account to import activities and log distances to your races automatically.
+                Link your Strava account to import activities and log distances
+                to your races automatically.
               </p>
               <button
                 onClick={handleStravaConnect}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#FC4C02] hover:bg-[#E04400] text-white text-sm font-semibold transition-colors cursor-pointer"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
                 </svg>
                 Connect with Strava
@@ -262,7 +281,9 @@ const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
           <div className="px-5 pb-3">
             <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/30">
               <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-              <p className="text-xs text-red-600 dark:text-red-400">{fetchError}</p>
+              <p className="text-xs text-red-600 dark:text-red-400">
+                {fetchError}
+              </p>
             </div>
           </div>
         )}
@@ -295,69 +316,76 @@ const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
               <>
                 <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                   {activities.map((activity) => (
-                  <button
-                    key={activity.id}
-                    type="button"
-                    disabled={activity.imported}
-                    onClick={() => handleSelectActivity(activity)}
-                    className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${
-                      activity.imported
-                        ? "border-emerald-200 dark:border-emerald-800/30 bg-emerald-50 dark:bg-emerald-900/10 opacity-60"
-                        : "border-black/5 dark:border-white/5 bg-[#F5F5F0] dark:bg-[#2A2A2E] hover:border-[#FC4C02]/30 hover:bg-[#FC4C02]/5"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide ${
-                            activity.type === "run"
-                              ? "bg-[#FF5733]/10 text-[#FF5733]"
-                              : activity.type === "cycle"
-                                ? "bg-blue-500/10 text-blue-500"
-                                : "bg-[#FFB800]/10 text-[#FFB800]"
-                          }`}>
-                            {activity.stravaType}
-                          </span>
-                          {activity.imported && (
-                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-                              Already Imported
+                    <button
+                      key={activity.id}
+                      type="button"
+                      disabled={activity.imported}
+                      onClick={() => handleSelectActivity(activity)}
+                      className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${
+                        activity.imported
+                          ? "border-emerald-200 dark:border-emerald-800/30 bg-emerald-50 dark:bg-emerald-900/10 opacity-60"
+                          : "border-black/5 dark:border-white/5 bg-[#F5F5F0] dark:bg-[#2A2A2E] hover:border-[#FC4C02]/30 hover:bg-[#FC4C02]/5"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span
+                              className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide ${
+                                activity.type === "run"
+                                  ? "bg-[#FF5733]/10 text-[#FF5733]"
+                                  : activity.type === "cycle"
+                                    ? "bg-blue-500/10 text-blue-500"
+                                    : "bg-[#FFB800]/10 text-[#FFB800]"
+                              }`}
+                            >
+                              {activity.stravaType}
                             </span>
-                          )}
+                            {activity.imported && (
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                                Already Imported
+                              </span>
+                            )}
+                          </div>
+                          <p className="font-raleway font-semibold text-sm text-[#1A1A1A] dark:text-white truncate">
+                            {activity.name}
+                          </p>
+                          <p className="font-merriweather-sans text-xs text-[#1A1A1A]/40 dark:text-white/30 mt-0.5">
+                            {formatDate(activity.startDate)} ·{" "}
+                            {activity.averagePace}
+                          </p>
+                          {/* View on Strava link — API Agreement Section 2.14.5 */}
+                          <a
+                            href={activity.stravaUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 mt-1 text-[10px] text-[#FC4C02] hover:text-[#E04400] font-medium transition-colors"
+                          >
+                            View on Strava
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
                         </div>
-                        <p className="font-raleway font-semibold text-sm text-[#1A1A1A] dark:text-white truncate">
-                          {activity.name}
-                        </p>
-                        <p className="font-merriweather-sans text-xs text-[#1A1A1A]/40 dark:text-white/30 mt-0.5">
-                          {formatDate(activity.startDate)} · {activity.averagePace}
-                        </p>
-                        {/* View on Strava link — API Agreement Section 2.14.5 */}
-                        <a
-                          href={activity.stravaUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 mt-1 text-[10px] text-[#FC4C02] hover:text-[#E04400] font-medium transition-colors"
-                        >
-                          View on Strava
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
+                        <div className="text-right shrink-0">
+                          <p className="font-raleway font-bold text-sm text-[#1A1A1A] dark:text-white">
+                            {activity.distance.toFixed(1)} km
+                          </p>
+                          <p className="font-merriweather-sans text-xs text-[#1A1A1A]/40 dark:text-white/30">
+                            {formatDuration(activity.movingTime)}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right shrink-0">
-                        <p className="font-raleway font-bold text-sm text-[#1A1A1A] dark:text-white">
-                          {activity.distance.toFixed(1)} km
-                        </p>
-                        <p className="font-merriweather-sans text-xs text-[#1A1A1A]/40 dark:text-white/30">
-                          {formatDuration(activity.movingTime)}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  ))}
                 </div>
 
                 {/* Powered by Strava — API Agreement Section 2.3 Brand Attribution */}
                 <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-center gap-1.5">
-                  <svg className="w-3.5 h-3.5 text-[#FC4C02]" viewBox="0 0 24 24" fill="currentColor">
+                  <svg
+                    className="w-3.5 h-3.5 text-[#FC4C02]"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
                     <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
                   </svg>
                   <span className="text-[10px] text-[#1A1A1A]/30 dark:text-white/20 font-merriweather-sans">
@@ -374,7 +402,11 @@ const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
           <div className="p-5 space-y-4">
             {/* Selected Activity Preview */}
             <div className="flex items-center gap-3 p-3 rounded-xl bg-[#FC4C02]/5 border border-[#FC4C02]/15">
-              <svg className="w-5 h-5 text-[#FC4C02] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <svg
+                className="w-5 h-5 text-[#FC4C02] shrink-0"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
               </svg>
               <div className="flex-1 min-w-0">
@@ -382,7 +414,9 @@ const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
                   {selectedActivity.name}
                 </p>
                 <p className="font-merriweather-sans text-xs text-[#1A1A1A]/60 dark:text-white/50">
-                  {selectedActivity.distance.toFixed(1)} km · {formatDuration(selectedActivity.movingTime)} · {selectedActivity.averagePace}
+                  {selectedActivity.distance.toFixed(1)} km ·{" "}
+                  {formatDuration(selectedActivity.movingTime)} ·{" "}
+                  {selectedActivity.averagePace}
                 </p>
                 <a
                   href={selectedActivity.stravaUrl}
@@ -436,17 +470,14 @@ const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
               <label className="block text-xs font-medium text-[#1A1A1A]/60 dark:text-white/40 mb-1.5 uppercase tracking-wider">
                 Assign to Race
               </label>
-              <select
+              <CustomSelect
                 value={raceId}
-                onChange={(e) => setRaceId(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-[#F5F5F0] dark:bg-[#2A2A2E] text-sm text-[#1A1A1A] dark:text-white border-0 focus:ring-2 focus:ring-[#FF5733] outline-none cursor-pointer"
-              >
-                {inProgressRaces.map((race) => (
-                  <option key={race.id} value={race.id}>
-                    {race.title} ({race.category})
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setRaceId(val)}
+                options={inProgressRaces.map((race) => ({
+                  value: race.id,
+                  label: `${race.title} (${race.category})`,
+                }))}
+              />
             </div>
 
             {/* Import Button */}
@@ -462,7 +493,11 @@ const LogActivityPanel = ({ open, preselectedRaceId, onClose }: Props) => {
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <svg
+                    className="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
                     <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
                   </svg>
                   Import & Log {selectedActivity.distance.toFixed(1)} km

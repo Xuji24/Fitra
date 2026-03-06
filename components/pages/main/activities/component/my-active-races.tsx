@@ -1,30 +1,51 @@
 "use client";
 
 import Image from "next/image";
-import { joinedRacesData } from "@/data/activities-data";
 import type { JoinedRace } from "@/data/activities-data";
 
-const statusStyles: Record<JoinedRace["status"], { label: string; cls: string }> =
-  {
-    "in-progress": {
-      label: "In Progress",
-      cls: "bg-[#FF5733]/10 text-[#FF5733]",
-    },
-    completed: {
-      label: "Completed",
-      cls: "bg-emerald-500/10 text-emerald-500",
-    },
-    upcoming: {
-      label: "Upcoming",
-      cls: "bg-[#FFB800]/10 text-[#FFB800]",
-    },
-  };
+const statusStyles: Record<
+  JoinedRace["status"],
+  { label: string; cls: string }
+> = {
+  "in-progress": {
+    label: "In Progress",
+    cls: "bg-[#FF5733]/10 text-[#FF5733]",
+  },
+  completed: {
+    label: "Completed",
+    cls: "bg-emerald-500/10 text-emerald-500",
+  },
+  upcoming: {
+    label: "Upcoming",
+    cls: "bg-[#FFB800]/10 text-[#FFB800]",
+  },
+};
 
 interface Props {
+  races: JoinedRace[];
   onLogDistance?: (raceId: string) => void;
 }
 
-const MyActiveRaces = ({ onLogDistance }: Props) => {
+const MyActiveRaces = ({ races, onLogDistance }: Props) => {
+  if (races.length === 0) {
+    return (
+      <div>
+        <h2 className="text-lg font-bold text-[#1A1A1A] dark:text-white font-raleway mb-5">
+          My Races
+        </h2>
+        <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/5 dark:border-white/5 p-10 text-center">
+          <p className="text-sm text-[#1A1A1A]/50 dark:text-white/40">
+            You haven&apos;t joined any races yet. Head to the{" "}
+            <a href="/race" className="text-[#FF5733] hover:underline">
+              Races
+            </a>{" "}
+            page to register!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
@@ -32,16 +53,16 @@ const MyActiveRaces = ({ onLogDistance }: Props) => {
           My Races
         </h2>
         <span className="text-xs text-[#1A1A1A]/40 dark:text-white/30 uppercase tracking-wider">
-          {joinedRacesData.length} joined
+          {races.length} joined
         </span>
       </div>
 
       {/* Horizontal scroll */}
       <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide">
-        {joinedRacesData.map((race) => {
+        {races.map((race) => {
           const progress = Math.min(
             (race.loggedDistance / race.targetDistance) * 100,
-            100
+            100,
           );
           const style = statusStyles[race.status];
 

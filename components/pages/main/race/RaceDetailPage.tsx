@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { RaceEvent } from "@/utils/types/race-types";
@@ -15,29 +15,39 @@ import {
   Award,
   Gift,
   Shirt,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
-import Navbar from "@/components/navbar";
 import JoinRaceModal from "./component/join-race-modal";
 import ShareRacePopover from "./component/share-race-popover";
+import { checkRaceRegistration } from "@/app/(main)/actions";
 
 interface Props {
   race: RaceEvent;
+  initialRegistered?: boolean;
 }
 
-export default function RaceDetailPage({ race }: Props) {
+export default function RaceDetailPage({
+  race,
+  initialRegistered = false,
+}: Props) {
   const [joinOpen, setJoinOpen] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(initialRegistered);
   const spotsLeft = race.maxParticipants - race.participants;
   const isFull = spotsLeft <= 0;
   const deadlineDate = new Date(race.registrationDeadline);
   const isPastDeadline = deadlineDate < new Date();
   const fillPercentage = (race.participants / race.maxParticipants) * 100;
-  const canRegister = !isFull && !isPastDeadline && race.registrationOpen;
+  const canRegister =
+    !isFull && !isPastDeadline && race.registrationOpen && !isRegistered;
+
+  const refreshRegistration = useCallback(async () => {
+    const { registered } = await checkRaceRegistration(race.dbId);
+    setIsRegistered(registered);
+  }, [race.dbId]);
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-
       {/* Banner Image */}
       <div className="relative w-full h-64 sm:h-80 lg:h-96">
         <Image
@@ -47,7 +57,7 @@ export default function RaceDetailPage({ race }: Props) {
           priority
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
 
         {/* Category Badge */}
         <span className="absolute top-6 left-6 bg-[#1A1A1A]/85 text-white text-sm font-raleway font-bold px-4 py-1.5 rounded-full">
@@ -144,7 +154,7 @@ export default function RaceDetailPage({ race }: Props) {
             </div>
 
             {/* E-Certificate */}
-            <div className="bg-gradient-to-br from-[#FFF8F5] to-[#FFF1EB] dark:from-[#1C1C1E] dark:to-[#221A16] rounded-2xl p-6 border border-[#FF5733]/10 dark:border-[#FF5733]/20">
+            <div className="bg-linear-to-br from-[#FFF8F5] to-[#FFF1EB] dark:from-[#1C1C1E] dark:to-[#221A16] rounded-2xl p-6 border border-[#FF5733]/10 dark:border-[#FF5733]/20">
               <h2 className="font-raleway font-bold text-lg text-foreground mb-4 flex items-center gap-2">
                 <Award size={18} className="text-[#FF5733]" />
                 E-Certificate
@@ -172,7 +182,7 @@ export default function RaceDetailPage({ race }: Props) {
             </div>
 
             {/* Medal */}
-            <div className="bg-gradient-to-br from-[#FFFDF5] to-[#FFF8E5] dark:from-[#1C1C1E] dark:to-[#1E1C14] rounded-2xl p-6 border border-[#FFB800]/10 dark:border-[#FFB800]/20">
+            <div className="bg-linear-to-br from-[#FFFDF5] to-[#FFF8E5] dark:from-[#1C1C1E] dark:to-[#1E1C14] rounded-2xl p-6 border border-[#FFB800]/10 dark:border-[#FFB800]/20">
               <h2 className="font-raleway font-bold text-lg text-foreground mb-4 flex items-center gap-2">
                 <Medal size={18} className="text-[#FFB800]" />
                 Finisher&apos;s Medal
@@ -200,7 +210,7 @@ export default function RaceDetailPage({ race }: Props) {
             </div>
 
             {/* T-Shirt Design */}
-            <div className="bg-gradient-to-br from-[#F5FFF5] to-[#EEFAEE] dark:from-[#1C1C1E] dark:to-[#161E16] rounded-2xl p-6 border border-emerald-500/10 dark:border-emerald-500/20">
+            <div className="bg-linear-to-br from-[#F5FFF5] to-[#EEFAEE] dark:from-[#1C1C1E] dark:to-[#161E16] rounded-2xl p-6 border border-emerald-500/10 dark:border-emerald-500/20">
               <h2 className="font-raleway font-bold text-lg text-foreground mb-4 flex items-center gap-2">
                 <Shirt size={18} className="text-emerald-500" />
                 Event T-Shirt
@@ -220,7 +230,9 @@ export default function RaceDetailPage({ race }: Props) {
                     Official Race T-Shirt
                   </h3>
                   <p className="font-merriweather-sans text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                    Premium performance tech shirt included for all registered participants. Available in sizes S to 2XL. Select your size during registration.
+                    Premium performance tech shirt included for all registered
+                    participants. Available in sizes S to 2XL. Select your size
+                    during registration.
                   </p>
                 </div>
               </div>
@@ -297,21 +309,36 @@ export default function RaceDetailPage({ race }: Props) {
                 <Button
                   onClick={() => setJoinOpen(true)}
                   disabled={!canRegister}
-                  className="w-full py-4 rounded-xl bg-[#FF5733] text-white font-raleway font-bold text-base hover:bg-[#E84E2E] hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className={`w-full py-4 rounded-xl font-raleway font-bold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${
+                    isRegistered
+                      ? "bg-emerald-600 text-white cursor-default"
+                      : "bg-[#FF5733] text-white hover:bg-[#E84E2E] hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                  }`}
                 >
-                  {isFull
-                    ? "Race is Full"
-                    : isPastDeadline
-                      ? "Registration Closed"
-                      : !race.registrationOpen
-                        ? "Registration Closed"
-                        : "Join Race"}
+                  {isRegistered ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <CheckCircle2 size={18} />
+                      Already Registered
+                    </span>
+                  ) : isFull ? (
+                    "Race is Full"
+                  ) : isPastDeadline ? (
+                    "Registration Closed"
+                  ) : !race.registrationOpen ? (
+                    "Registration Closed"
+                  ) : (
+                    "Join Race"
+                  )}
                 </Button>
 
                 {/* Share */}
                 <div className="mt-3">
                   <ShareRacePopover
-                    url={typeof window !== "undefined" ? window.location.href : `/race/${race.id}`}
+                    url={
+                      typeof window !== "undefined"
+                        ? window.location.href
+                        : `/race/${race.id}`
+                    }
                     title={race.title}
                   />
                 </div>
@@ -354,7 +381,12 @@ export default function RaceDetailPage({ race }: Props) {
       </div>
 
       {/* Join Race Modal */}
-      <JoinRaceModal race={race} open={joinOpen} onClose={() => setJoinOpen(false)} />
+      <JoinRaceModal
+        race={race}
+        open={joinOpen}
+        onClose={() => setJoinOpen(false)}
+        onRegistered={refreshRegistration}
+      />
     </div>
   );
 }

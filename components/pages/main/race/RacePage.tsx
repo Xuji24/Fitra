@@ -1,15 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Navbar from "@/components/navbar";
 import RaceCard from "./component/race-card";
 import RaceFilter from "./component/race-filter";
 import { RaceCategory } from "@/utils/types/race-types";
 import { racesData } from "@/data/races-data";
 
 export default function RacePage() {
-  const [selectedCategory, setSelectedCategory] =
-    useState<RaceCategory>("All");
+  const [selectedCategory, setSelectedCategory] = useState<RaceCategory>("All");
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredRaces = useMemo(() => {
@@ -27,8 +25,6 @@ export default function RacePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-
       <div className="px-6 sm:px-10 lg:px-16 xl:px-20 py-8 sm:py-10">
         {/* Title */}
         <h1 className="font-raleway font-bold text-2xl sm:text-3xl lg:text-4xl text-foreground mb-2">
@@ -50,10 +46,7 @@ export default function RacePage() {
         {filteredRaces.length > 0 ? (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
             {filteredRaces.map((race) => (
-              <RaceCard
-                key={race.id}
-                race={race}
-              />
+              <RaceCard key={race.id} race={race} />
             ))}
           </div>
         ) : (

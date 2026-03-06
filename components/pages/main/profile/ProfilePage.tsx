@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/client";
 import { User, Mail, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import Navbar from "@/components/navbar";
 
 interface ProfileData {
   firstName: string;
@@ -98,11 +97,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div>
-        <Navbar />
-        <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#121212] flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-[#FF5733]" />
-        </div>
+      <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#121212] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#FF5733]" />
       </div>
     );
   }
@@ -113,7 +109,6 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <Navbar />
       <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#121212] pt-8 pb-20">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           {/* Page Header */}

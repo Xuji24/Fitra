@@ -6,18 +6,24 @@ import {
   PolarAngleAxis,
   ResponsiveContainer,
 } from "recharts";
-import { weeklyData, joinedRacesData } from "@/data/activities-data";
+import type { WeeklyStat, JoinedRace } from "@/data/activities-data";
 
-const RaceProgressOverview = () => {
+interface Props {
+  joinedRaces: JoinedRace[];
+  weeklyData: WeeklyStat[];
+}
+
+const RaceProgressOverview = ({ joinedRaces, weeklyData }: Props) => {
   // Pick the first in-progress race as the featured one
-  const featured = joinedRacesData.find((r) => r.status === "in-progress");
+  const featured = joinedRaces.find((r) => r.status === "in-progress");
   if (!featured) return null;
 
   const progress = Math.min(
     (featured.loggedDistance / featured.targetDistance) * 100,
-    100
+    100,
   );
-  const remaining = Math.round((featured.targetDistance - featured.loggedDistance) * 10) / 10;
+  const remaining =
+    Math.round((featured.targetDistance - featured.loggedDistance) * 10) / 10;
 
   // Average daily km from weekly data
   const activeDays = weeklyData.filter((d) => d.distance > 0).length;

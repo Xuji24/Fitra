@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { completedRacesData } from "@/data/activities-data";
+import type { CompletedRace } from "@/data/activities-data";
 
-const CompletedRaces = () => {
-  if (completedRacesData.length === 0) return null;
+const CompletedRaces = ({ races }: { races: CompletedRace[] }) => {
+  if (races.length === 0) return null;
 
   return (
     <div>
@@ -13,12 +13,12 @@ const CompletedRaces = () => {
           Completed Races
         </h2>
         <span className="text-xs text-emerald-500 font-medium">
-          {completedRacesData.length} finished
+          {races.length} finished
         </span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {completedRacesData.map((race) => (
+        {races.map((race) => (
           <div
             key={race.id}
             className="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-black/5 dark:border-white/5 overflow-hidden group"

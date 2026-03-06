@@ -1,17 +1,57 @@
-import Navbar from "@/components/navbar";
 import LeaderboardTable from "./component/leaderboard-table";
 import LeaderboardPodium from "./component/leaderboard-podium";
 import { leaderboardData } from "@/data/leaderboard-data";
+import { createClient } from "@/lib/supabase/server";
 import { Trophy } from "lucide-react";
+import type { LeaderboardEntry } from "@/utils/types/leaderboard-types";
 
-export default function LeaderboardPage() {
-  const topThree = leaderboardData.slice(0, 3);
-  const remaining = leaderboardData.slice(3);
+export default async function LeaderboardPage() {
+  let entries: LeaderboardEntry[] = [];
+
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("leaderboard_entries")
+      .select(
+        "rank, total_distance_km, avg_pace, last_run_date, profiles(full_name, username)",
+      )
+      .order("rank");
+
+    if (data && data.length > 0) {
+      entries = data.map((row) => {
+        const profile = row.profiles as unknown as {
+          full_name: string;
+          username: string;
+        } | null;
+        return {
+          rank: row.rank ?? 0,
+          user: profile?.full_name ?? "Unknown",
+          username: profile?.username ? `@${profile.username}` : "@unknown",
+          pacing: row.avg_pace ?? "—",
+          distance: `${Math.round(Number(row.total_distance_km))}km`,
+          lastRun: row.last_run_date
+            ? new Date(row.last_run_date).toLocaleDateString("en-US", {
+                month: "numeric",
+                day: "numeric",
+                year: "numeric",
+              })
+            : "—",
+        };
+      });
+    }
+  } catch {
+    // DB fetch failed — fall back to static data
+  }
+
+  if (entries.length === 0) {
+    entries = leaderboardData;
+  }
+
+  const topThree = entries.slice(0, 3);
+  const remaining = entries.slice(3);
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#121212]">
-      <Navbar />
-
       {/* Hero Header */}
       <section className="relative bg-[#1A1A1A] dark:bg-[#0D0D0D] overflow-hidden">
         {/* Background decorative elements */}

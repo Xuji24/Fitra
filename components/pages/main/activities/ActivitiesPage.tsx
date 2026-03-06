@@ -8,13 +8,39 @@ import LogActivityPanel from "./component/log-activity-panel";
 import ActivityLog from "./component/activity-log";
 import RaceProgressOverview from "./component/race-progress-overview";
 import CompletedRaces from "./component/completed-races";
-import Navbar from "@/components/navbar";
-import { getQuickStats } from "@/data/activities-data";
+import type {
+  JoinedRace,
+  ActivityEntry,
+  CompletedRace,
+  WeeklyStat,
+} from "@/data/activities-data";
 
-const ActivitiesPage = () => {
+interface QuickStats {
+  totalLogged: number;
+  activeCount: number;
+  completedCount: number;
+  streak: number;
+}
+
+interface ActivitiesPageProps {
+  joinedRaces: JoinedRace[];
+  activityLog: ActivityEntry[];
+  completedRaces: CompletedRace[];
+  weeklyData: WeeklyStat[];
+  quickStats: QuickStats;
+}
+
+const ActivitiesPage = ({
+  joinedRaces,
+  activityLog,
+  completedRaces,
+  weeklyData,
+  quickStats,
+}: ActivitiesPageProps) => {
   const [logOpen, setLogOpen] = useState(false);
   const [selectedRaceId, setSelectedRaceId] = useState<string | undefined>();
-  const stats = getQuickStats();
+
+  const inProgressRaces = joinedRaces.filter((r) => r.status === "in-progress");
 
   const handleLogDistance = (raceId: string) => {
     setSelectedRaceId(raceId);
@@ -23,8 +49,6 @@ const ActivitiesPage = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#121212]">
-      <Navbar />
-
       {/* Hero Header */}
       <section className="relative bg-[#1A1A1A] dark:bg-[#0D0D0D] pt-28 pb-14 md:pt-32 md:pb-16">
         {/* Radial glow */}
@@ -42,11 +66,11 @@ const ActivitiesPage = () => {
                 </span>
               </div>
               <h1 className="font-raleway text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                Activity{" "}
-                <span className="text-[#FF5733]">Dashboard</span>
+                Activity <span className="text-[#FF5733]">Dashboard</span>
               </h1>
               <p className="mt-3 text-white/50 text-sm md:text-base max-w-lg">
-                Track your workouts, log distances to your virtual races, and watch your progress grow.
+                Track your workouts, log distances to your virtual races, and
+                watch your progress grow.
               </p>
             </div>
 
@@ -54,7 +78,7 @@ const ActivitiesPage = () => {
             <div className="flex gap-6">
               <div className="text-center">
                 <p className="text-2xl md:text-3xl font-bold text-white font-raleway">
-                  {stats.totalLogged}
+                  {quickStats.totalLogged}
                 </p>
                 <p className="text-white/40 text-xs uppercase tracking-wider mt-1">
                   km logged
@@ -63,7 +87,7 @@ const ActivitiesPage = () => {
               <div className="w-px bg-white/10" />
               <div className="text-center">
                 <p className="text-2xl md:text-3xl font-bold text-white font-raleway">
-                  {stats.activeCount}
+                  {quickStats.activeCount}
                 </p>
                 <p className="text-white/40 text-xs uppercase tracking-wider mt-1">
                   active races
@@ -72,7 +96,7 @@ const ActivitiesPage = () => {
               <div className="w-px bg-white/10" />
               <div className="text-center">
                 <p className="text-2xl md:text-3xl font-bold text-[#FFB800] font-raleway">
-                  {stats.streak}
+                  {quickStats.streak}
                 </p>
                 <p className="text-white/40 text-xs uppercase tracking-wider mt-1">
                   day streak
@@ -86,32 +110,36 @@ const ActivitiesPage = () => {
       {/* Main Content */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 space-y-10">
         {/* 1. Quick Stats */}
-        <ActivityStats />
+        <ActivityStats stats={quickStats} />
 
         {/* 2. My Active Races (horizontal scroll) */}
-        <MyActiveRaces onLogDistance={handleLogDistance} />
+        <MyActiveRaces races={joinedRaces} onLogDistance={handleLogDistance} />
 
         {/* 3. Weekly Summary + Race Progress side by side */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <WeeklySummary />
+            <WeeklySummary data={weeklyData} />
           </div>
           <div>
-            <RaceProgressOverview />
+            <RaceProgressOverview
+              joinedRaces={joinedRaces}
+              weeklyData={weeklyData}
+            />
           </div>
         </div>
 
         {/* 4. Activity Log */}
-        <ActivityLog />
+        <ActivityLog entries={activityLog} />
 
         {/* 5. Completed Races */}
-        <CompletedRaces />
+        <CompletedRaces races={completedRaces} />
       </section>
 
       {/* Log Activity Modal */}
       <LogActivityPanel
         open={logOpen}
         preselectedRaceId={selectedRaceId}
+        inProgressRaces={inProgressRaces}
         onClose={() => {
           setLogOpen(false);
           setSelectedRaceId(undefined);
